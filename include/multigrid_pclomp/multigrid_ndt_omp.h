@@ -166,22 +166,43 @@ namespace pclomp
 			addTarget(const PointCloudTargetConstPtr &cloud, const std::string target_id)
 		{
 			pcl::Registration<PointSource, PointTarget>::setInputTarget(cloud);
-			target_cells_.setLeafSize(resolution_, resolution_, resolution_);
-			target_cells_.setInputCloudAndFilter(cloud, target_id);
+			target_cells_->setLeafSize(resolution_, resolution_, resolution_);
+			target_cells_->setInputCloudAndFilter(cloud, target_id);
+		}
+
+		inline void setInputTargetTmp(const PointCloudTargetConstPtr &cloud)
+		{
+			pcl::Registration<PointSource, PointTarget>::setInputTarget(cloud);
 		}
 
 		inline void
 			removeTarget(const std::string target_id)
 		{
-			target_cells_.removeCloud(target_id);
+			target_cells_->removeCloud(target_id);
 		}
 
 		inline void
 			createVoxelKdtree()
 		{
-			target_cells_.createKdtree();
+			target_cells_->createKdtree();
 		}
 
+		inline std::shared_ptr<TargetGrid> deepCopyTargetCells() const
+		{
+			return std::make_shared<TargetGrid>(*target_cells_);
+		}
+
+		inline void updateTargetCells(std::shared_ptr<TargetGrid> &new_target_cells)
+		{
+			//target_cells_ = new_target_cells;
+			//target_cells_.reset(new_target_cells.get());
+			target_cells_.swap(new_target_cells);
+		}
+
+		inline void targetCloudUpdated()
+		{
+			pcl::Registration<PointSource, PointTarget>::target_cloud_updated_ = true;
+		}
 
 		/** \brief Set/change the voxel grid resolution.
 		  * \param[in] resolution side length of voxels
@@ -363,12 +384,12 @@ namespace pclomp
 
 		pcl::PointCloud<PointTarget> getVoxelPCD() const
 		{
-			return target_cells_.getVoxelPCD();
+			return target_cells_->getVoxelPCD();
 		}
 
 		std::vector<std::string> getCurrentMapIDs() const
 		{
-			return target_cells_.getCurrentMapIDs();
+			return target_cells_->getCurrentMapIDs();
 		}
 
 		
@@ -579,7 +600,7 @@ namespace pclomp
 		}
 
 		/** \brief The voxel grid generated from target cloud containing point means and covariances. */
-		TargetGrid target_cells_;
+		std::shared_ptr<TargetGrid> target_cells_;
 
 		//double fitness_epsilon_;
 

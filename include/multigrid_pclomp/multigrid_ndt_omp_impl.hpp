@@ -59,8 +59,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename PointSource, typename PointTarget>
 pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::MultiGridNormalDistributionsTransform ()
-  : target_cells_ ()
-  , resolution_ (1.0f)
+  : resolution_ (1.0f)
   , step_size_ (0.1)
   , outlier_ratio_ (0.55)
   , gauss_d1_ ()
@@ -73,6 +72,8 @@ pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::MultiGr
   , h_ang_d3_ (), h_ang_e1_ (), h_ang_e2_ (), h_ang_e3_ (), h_ang_f1_ (), h_ang_f2_ (), h_ang_f3_ ()
 {
   reg_name_ = "MultiGridNormalDistributionsTransform";
+
+  target_cells_ = std::make_shared<TargetGrid>();
 
   double gauss_c1, gauss_c2;
 
@@ -276,7 +277,7 @@ pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::compute
 		auto& distances = distancess[thread_n];
 
     // Neighborhood search method other than kdtree is disabled in multigrid_ndt_omp
-    target_cells_.radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
+    target_cells_->radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
 
 		double sum_score_pt = 0;
     double nearest_voxel_score_pt = 0;
@@ -652,7 +653,7 @@ pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::compute
     std::vector<float> distances;
 
     // Neighborhood search method other than kdtree is disabled in multigrid_ndt_omp
-    target_cells_.radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
+    target_cells_->radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
 
     for (typename std::vector<TargetGridLeafConstPtr>::iterator neighborhood_it = neighborhood.begin (); neighborhood_it != neighborhood.end (); neighborhood_it++)
     {
@@ -1023,7 +1024,7 @@ double pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::
 		std::vector<float> distances;
 
     // Neighborhood search method other than kdtree is disabled in multigrid_ndt_omp
-    target_cells_.radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
+    target_cells_->radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
 
 		for (typename std::vector<TargetGridLeafConstPtr>::iterator neighborhood_it = neighborhood.begin(); neighborhood_it != neighborhood.end(); neighborhood_it++)
 		{
@@ -1066,7 +1067,7 @@ double pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::
 		std::vector<float> distances;
 
     // Neighborhood search method other than kdtree is disabled in multigrid_ndt_omp
-    target_cells_.radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
+    target_cells_->radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
 
 		for (typename std::vector<TargetGridLeafConstPtr>::iterator neighborhood_it = neighborhood.begin(); neighborhood_it != neighborhood.end(); neighborhood_it++)
 		{
@@ -1111,7 +1112,7 @@ double pclomp::MultiGridNormalDistributionsTransform<PointSource, PointTarget>::
 		std::vector<float> distances;
 
     // Neighborhood search method other than kdtree is disabled in multigrid_ndt_omp
-    target_cells_.radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
+    target_cells_->radiusSearch(x_trans_pt, resolution_, neighborhood, distances);
 
 		for (typename std::vector<TargetGridLeafConstPtr>::iterator neighborhood_it = neighborhood.begin(); neighborhood_it != neighborhood.end(); neighborhood_it++)
 		{
